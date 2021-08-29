@@ -1,0 +1,124 @@
+name: Manual Install Package Version
+on:
+  workflow_dispatch:
+jobs:
+  install_dev:
+    runs-on: ubuntu-latest
+    steps:
+      # checkout repository
+      - name: Checkout Repository Main Branch
+        id: checkout
+        uses: actions/checkout@v2
+        with:
+          ref: qa
+          submodules: true
+          ssh-key: ${{ secrets.ORG_SALESFORCEDX_USER_SSH_KEY }}
+      # configure aws variables
+      - name: Configure container registry
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ORG_SALESFORCEDX_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ORG_SALESFORCEDX_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.ORG_SALESFORCEDX_AWS_REGION }}
+      # login to container registry
+      - name: Login to container registry
+        id: login-aws-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      # install package to the environment
+      - name: Install package in dev environment
+        id: install_dev
+        uses: ./config/workflow/run-lower-container # Uses an action in the specified directory
+        env:
+          DEV_HUB_URL: ${{ secrets.ORG_SALESFORCEDX_PROD_URL }}
+          ENV_URL: ${{ secrets.ORG_SALESFORCEDX_ECOMM2DEV_URL }}
+          SCRIPTS_PATH: /operation/workspace/config/
+          BRANCH: ${{ github.ref }}
+          IMAGE_NAME: sfdx-config:latest
+        # pass input parameter
+        with:
+          # operation to perform
+          operation: install_version
+          # url to pull image
+          imageurl: ${{ steps.login-aws-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}
+          # workspace path
+          workspace: $GITHUB_WORKSPACE
+  install_ci:
+    runs-on: ubuntu-latest
+    steps:
+      # checkout repository
+      - name: Checkout Repository Main Branch
+        id: checkout
+        uses: actions/checkout@v2
+        with:
+          ref: qa
+          submodules: true
+          ssh-key: ${{ secrets.ORG_SALESFORCEDX_USER_SSH_KEY }}
+      # configure aws variables
+      - name: Configure container registry
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ORG_SALESFORCEDX_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ORG_SALESFORCEDX_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.ORG_SALESFORCEDX_AWS_REGION }}
+      # login to container registry
+      - name: Login to container registry
+        id: login-aws-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      # install package to the environment
+      - name: Install package in ci environment
+        id: install_ci
+        uses: ./config/workflow/run-lower-container # Uses an action in the specified directory
+        env:
+          DEV_HUB_URL: ${{ secrets.ORG_SALESFORCEDX_PROD_URL }}
+          ENV_URL: ${{ secrets.ORG_SALESFORCEDX_SAGE_CI_URL }},
+          SCRIPTS_PATH: /operation/workspace/config/
+          BRANCH: ${{ github.ref }}
+          IMAGE_NAME: sfdx-config:latest
+        # pass input parameter
+        with:
+          # operation to perform
+          operation: install_version
+          # url to pull image
+          imageurl: ${{ steps.login-aws-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}
+          # workspace path
+          workspace: $GITHUB_WORKSPACE
+  install_sit:
+    runs-on: ubuntu-latest
+    steps:
+      # checkout repository
+      - name: Checkout Repository Main Branch
+        id: checkout
+        uses: actions/checkout@v2
+        with:
+          ref: qa
+          submodules: true
+          ssh-key: ${{ secrets.ORG_SALESFORCEDX_USER_SSH_KEY }}
+      # configure aws variables
+      - name: Configure container registry
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ORG_SALESFORCEDX_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ORG_SALESFORCEDX_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.ORG_SALESFORCEDX_AWS_REGION }}
+      # login to container registry
+      - name: Login to container registry
+        id: login-aws-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      # install package to the environment
+      - name: Install package in sit environment
+        id: install_sit
+        uses: ./config/workflow/run-lower-container # Uses an action in the specified directory
+        env:
+          DEV_HUB_URL: ${{ secrets.ORG_SALESFORCEDX_PROD_URL }}
+          ENV_URL: ${{ secrets.ORG_SALESFORCEDX_SIT1_URL }}
+          SCRIPTS_PATH: /operation/workspace/config/
+          BRANCH: ${{ github.ref }}
+          IMAGE_NAME: sfdx-config:latest
+        # pass input parameter
+        with:
+          # operation to perform
+          operation: install_version
+          # url to pull image
+          imageurl: ${{ steps.login-aws-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}
+          # workspace path
+          workspace: $GITHUB_WORKSPACE

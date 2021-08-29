@@ -1,0 +1,12 @@
+{
+  "packageDirectories": [
+    {
+      "path": "community",
+      "default": true
+    }
+  ],
+  "name": "salesforce-global-community",
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "51.0"
+}

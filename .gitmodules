@@ -1,0 +1,4 @@
+[submodule "config"]
+	branch = master
+	path = config
+	url = git@github.com:unmarkedskills/salesforce-global-config.git

@@ -1,0 +1,46 @@
+name: Create Package Version
+on:
+  push:
+    branches: [ qa ]
+  workflow_dispatch:
+jobs:
+  main_sfdx_ci:
+    runs-on: ubuntu-latest
+    name: Create Package Version
+    steps:
+      # checkout the repository
+      - name: Checkout Repository Main Branch
+        id: checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          ssh-key: ${{ secrets.ORG_SALESFORCEDX_USER_SSH_KEY }}
+      # configure aws variables
+      - name: Configure container registry
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ORG_SALESFORCEDX_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ORG_SALESFORCEDX_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.ORG_SALESFORCEDX_AWS_REGION }}
+      # login to container registry
+      - name: Login to container registry
+        id: login-aws-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      # create package version
+      - name: Create Package Version
+        id: createpkg
+        uses: ./config/workflow/run-lower-container # Uses an action in the specified directory
+        env:
+          DEV_HUB_URL: ${{ secrets.ORG_SALESFORCEDX_PROD_URL }}
+          BRANCH: ${{ github.ref }}
+          LATEST_COMMIT: ${{ github.sha }}
+          SCRIPTS_PATH: /operation/workspace/config/
+          IMAGE_NAME: sfdx-config:latest
+        # pass input parameter
+        with:
+          # operation to perform
+          operation: create_version
+          # url to pull image
+          imageurl: ${{ steps.login-aws-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}
+          # workspace path
+          workspace: $GITHUB_WORKSPACE
